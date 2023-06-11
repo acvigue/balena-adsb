@@ -31,5 +31,5 @@ fi
 
 echo "detected $DEVICE_TYPE"
 
-#Starts our sensor read script.
-python src/sensor.py
+#Starts our LCD script.
+python src/main.py
