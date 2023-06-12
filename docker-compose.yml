@@ -1,0 +1,43 @@
+version: '2'
+services:
+  lcd:
+    build: ./lcd
+    container_name: lcd
+    hostname: lcd
+    restart: always
+    devices:
+      - "/dev/i2c-1:/dev/i2c-1"
+    networks:
+      - flightaware
+    privileged: true
+    labels:
+      io.balena.features.supervisor-api: '1'
+    environment:
+      - FA_AIRCRAFT_URL=http://piaware:8080/data/aircraft.json
+  piaware:
+    image: thomx/fr24feed-piaware
+    container_name: piaware
+    hostname: piaware
+    restart: always
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    ports:
+      - "80:8080"
+    networks:
+       - flightaware
+    tmpfs:
+      - /run:exec,size=64M
+      - /planefinder/log:exec,size=32M
+      - /usr/lib/fr24/public_html/data:size=32M
+  wifi-connect:
+    build: ./wifi-connect
+    container_name: wifi-connect
+    network_mode: "host"
+    labels:
+        io.balena.features.dbus: '1'
+    cap_add:
+        - NET_ADMIN
+    environment:
+        DBUS_SYSTEM_BUS_ADDRESS: "unix:path=/host/run/dbus/system_bus_socket"
+networks:
+  flightaware:
